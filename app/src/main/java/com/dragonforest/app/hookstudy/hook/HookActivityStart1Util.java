@@ -26,10 +26,10 @@ public class HookActivityStart1Util {
             Instrumentation mInstrumentationInstance = (Instrumentation) mInstrumentationField.get(activity);
 
             // 2.创建自己的Instrumentation
-            MyProxyInstumentation myProxyInstumentation=new MyProxyInstumentation(mInstrumentationInstance);
+            MyProxyInstumentation myProxyInstumentation = new MyProxyInstumentation(mInstrumentationInstance);
 
             // 3.设置成自己的Instrumentation,ok
-            mInstrumentationField.set(activity,myProxyInstumentation);
+            mInstrumentationField.set(activity, myProxyInstumentation);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -49,12 +49,12 @@ public class HookActivityStart1Util {
                 Intent intent, int requestCode, Bundle options) {
 
             // hook内容
-            Log.e("hook","哈哈，hook到startActivity的点了！！！");
+            Log.e("hook", "哈哈，hook到startActivity的点了！！！");
             try {
                 // execStartActivity方法是隐藏的，所以只能反射调用
                 Class<?> InstrumentationCls = Class.forName("android.app.Instrumentation");
                 Method execStartActivityMethod = InstrumentationCls.getDeclaredMethod("execStartActivity",
-                        Context.class,IBinder.class,Activity.class,Intent.class,int.class,Bundle.class);
+                        Context.class, IBinder.class, IBinder.class,Activity.class, Intent.class, int.class, Bundle.class);
                 execStartActivityMethod.setAccessible(true);
                 return (ActivityResult) execStartActivityMethod.invoke(mInstrumentaion, who, contextThread, token, target, intent, requestCode, options);
             } catch (Exception e) {
