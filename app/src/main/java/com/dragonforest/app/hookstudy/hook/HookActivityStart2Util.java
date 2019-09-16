@@ -12,25 +12,33 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * hook activity启动1
- * hook Activity启动Activity
+ * hook activity启动2
+ * hook Application启动activity
  *
  * @author 韩龙林
  * @date 2019/9/12 17:20
  */
-public class HookActivityStart1Util {
+public class HookActivityStart2Util {
     public static void hook(Activity activity) {
         try {
-            // 1.获取mInstrumentation实例
-            Field mInstrumentationField = Activity.class.getDeclaredField("mInstrumentation");
+            // 1.反射得到ActivityThread
+            Class<?> ActivityThreadCls = Class.forName("android.app.ActivityThread");
+            // 2.获取静态变量实例 sCurrentActivityThread
+            Field sCurrentActivityThreadField = ActivityThreadCls.getDeclaredField("sCurrentActivityThread");
+            sCurrentActivityThreadField.setAccessible(true);
+            Object sCurrentActivityThreadInstance = sCurrentActivityThreadField.get(null);
+
+            // 3.获取mInstrumentation实例
+            Field mInstrumentationField = ActivityThreadCls.getDeclaredField("mInstrumentation");
             mInstrumentationField.setAccessible(true);
-            Instrumentation mInstrumentationInstance = (Instrumentation) mInstrumentationField.get(activity);
+            Instrumentation mInstrumetationInstance = (Instrumentation) mInstrumentationField.get(sCurrentActivityThreadInstance);
 
-            // 2.创建自己的Instrumentation
-            MyProxyInstrumentation myProxyInstumentation = new MyProxyInstrumentation(mInstrumentationInstance);
+            // 4.创建代理类Instrumetation
+            MyProxyInstrumentation myProxyInstumentation = new MyProxyInstrumentation(mInstrumetationInstance);
 
-            // 3.设置成自己的Instrumentation,ok
-            mInstrumentationField.set(activity, myProxyInstumentation);
+            // 5.设置成我们自己的代理类
+            mInstrumentationField.set(sCurrentActivityThreadInstance, myProxyInstumentation);
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +63,7 @@ public class HookActivityStart1Util {
                 // execStartActivity方法是隐藏的，所以只能反射调用
                 Class<?> InstrumentationCls = Class.forName("android.app.Instrumentation");
                 Method execStartActivityMethod = InstrumentationCls.getDeclaredMethod("execStartActivity",
-                        Context.class, IBinder.class, IBinder.class,Activity.class, Intent.class, int.class, Bundle.class);
+                        Context.class, IBinder.class, IBinder.class, Activity.class, Intent.class, int.class, Bundle.class);
                 execStartActivityMethod.setAccessible(true);
                 return (ActivityResult) execStartActivityMethod.invoke(mInstrumentaion, who, contextThread, token, target, intent, requestCode, options);
             } catch (Exception e) {

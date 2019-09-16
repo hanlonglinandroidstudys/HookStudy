@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.dragonforest.app.hookstudy.hook.HookActivityStart2Util;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
                 go(HookActivityStart1Activity.class);
                 break;
             case R.id.btn_hook_activity_start2:
+                go(HookActivityStart2Activity.class);
                 break;
         }
     }
